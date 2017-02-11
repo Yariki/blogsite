@@ -38,8 +38,12 @@
                 
     }
 
-    @Html.Partial("_LoginPartial")    
+    @*@Html.Partial("_LoginPartial")*@    
 
+    <nav class="login-bottom">
+        <a asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+        <a asp-area="" asp-controller="Account" asp-action="Login">Log in</a>
+    </nav>
 </div>
     
     <span onclick="openNav()">open</span>

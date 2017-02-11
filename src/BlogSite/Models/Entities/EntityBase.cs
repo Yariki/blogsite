@@ -8,8 +8,6 @@ namespace BlogSite.Models.Entities
 
         public EntityBase()
         {
-            ID = Guid.NewGuid().ToString();
-            Created = DateTime.Now;
         }
 
         [Required]
