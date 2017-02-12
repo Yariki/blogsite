@@ -35,15 +35,11 @@
     <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
     @if (User != null && SignInManager.IsSignedIn(User))
     {
-                
+        <a asp-controller="BlogCategories" asp-action="Index">Categories</a>           
     }
 
-    @*@Html.Partial("_LoginPartial")*@    
+    @Html.Partial("_LoginPartial")   
 
-    <nav class="login-bottom">
-        <a asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-        <a asp-area="" asp-controller="Account" asp-action="Login">Log in</a>
-    </nav>
 </div>
     
     <span onclick="openNav()">open</span>

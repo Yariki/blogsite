@@ -10,14 +10,16 @@ namespace BlogSite.Models.Entities
         {
         }
 
-        [Required]
         [Key]
         public string ID { get; set; }
 
-        [Required]
+
+
+        [DataType(DataType.Date)]
         public DateTime Created { get; set; }
 
 
+        [DataType(DataType.Date)]
         public DateTime? Modified { get; set; }
 
 

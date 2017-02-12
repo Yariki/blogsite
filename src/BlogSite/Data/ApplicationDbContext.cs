@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using BlogSite.Models;
 using BlogSite.Models.Entities;
+using System.Threading;
 
 namespace BlogSite.Data
 {
@@ -16,7 +17,7 @@ namespace BlogSite.Data
         public BlogPostComment BlogPostComment { get; set; }
         public DbSet<BlogTag> BlogTags { get; set; }
         public DbSet<PostCategory> PostCategories { get; set; }
-        
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -28,6 +29,25 @@ namespace BlogSite.Data
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+
+            foreach (var entry in ChangeTracker.Entries<EntityBase>().Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.ID = Guid.NewGuid().ToString();
+                        entry.Entity.Created = DateTime.Now;
+                        break;
+                    case EntityState.Modified:
+                        entry.Entity.Modified = DateTime.Now;
+                        break;
+                }
+            }
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }
