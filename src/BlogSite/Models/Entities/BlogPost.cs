@@ -21,5 +21,8 @@ namespace BlogSite.Models.Entities
 
         public ICollection<BlogPostComment> BlogPostComments { get; set; }
 
+        [Display(Name = "Categories")]
+        public ICollection<PostCategory> PostCategories { get; set; }
+
     }
 }

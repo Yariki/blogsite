@@ -1,0 +1,66 @@
+@model BlogSite.Models.BlogPostViewModels.CreateBlogPostViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Create</h2>
+
+<form asp-action="Create">
+    <div class="form-horizontal">
+        <h4>BlogPost</h4>
+        <hr />
+        <input type="hidden" asp-for="@Model.BlogPost.ApplicationUserId" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        
+        <div class="form-group">
+            <label asp-for="@Model.BlogPost.Title" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="@Model.BlogPost.Title" class="form-control" />
+                <span asp-validation-for="@Model.BlogPost.Title" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.BlogPost.Article" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <textarea asp-for="@Model.BlogPost.Article" rows="5" cols="250"></textarea>
+                <span asp-validation-for="@Model.BlogPost.Article" class="text-danger" />
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <table>
+                <tr>
+                    <td>@Html.LabelFor(m => m.BlogPost.PostCategories)</td>
+                </tr>
+                <tr>
+                    @{
+                        int cnt = 0;
+                        foreach (var modelBlogCategory in Model.BlogCategories)
+                        {
+                            if (cnt++ % 2 == 0)
+                            {
+                                @:<tr></tr>
+                            }
+                            @:<td><input type="checkbox" name="selectedCategories" value="@modelBlogCategory.ID"/>@modelBlogCategory.Name</td>
+                        }
+                    }
+                </tr>
+            </table>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

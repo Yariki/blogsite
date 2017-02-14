@@ -1,4 +1,6 @@
-﻿namespace BlogSite.Models.Entities
+﻿using System.Collections.Generic;
+
+namespace BlogSite.Models.Entities
 {
     public class PostCategory : EntityBase
     {

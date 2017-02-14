@@ -23,6 +23,13 @@ namespace BlogSite.Data
         {
         }
 
+
+        public static T CreateEntity<T>() where T : EntityBase, new()
+        {
+            return new T() {ID = Guid.NewGuid().ToString()};
+        }
+        
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -39,7 +46,10 @@ namespace BlogSite.Data
                 switch (entry.State)
                 {
                     case EntityState.Added:
-                        entry.Entity.ID = Guid.NewGuid().ToString();
+                        if (string.IsNullOrEmpty(entry.Entity.ID))
+                        {
+                            entry.Entity.ID = Guid.NewGuid().ToString();
+                        }
                         entry.Entity.Created = DateTime.Now;
                         break;
                     case EntityState.Modified:

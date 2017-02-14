@@ -73,6 +73,16 @@ textarea {
     transition: 0.3s
 }
 
+/* The navigation menu links */
+.sidenav .user {
+    padding: 8px 8px 8px 64px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s
+}
+
 /* When you mouse over the navigation links, change their color */
 .sidenav a:hover, .offcanvas a:focus{
     color: #f1f1f1;

@@ -8,9 +8,10 @@ using BlogSite.Data;
 namespace BlogSite.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170214224430_AddedPostCategory")]
+    partial class AddedPostCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.1")
@@ -170,11 +171,15 @@ namespace BlogSite.Data.Migrations
 
                     b.Property<DateTime?>("Modified");
 
+                    b.Property<string>("PostCategoryID");
+
                     b.HasKey("ID");
 
                     b.HasIndex("BlogCategoryId");
 
                     b.HasIndex("BlogPostId");
+
+                    b.HasIndex("PostCategoryID");
 
                     b.ToTable("PostCategories");
                 });
@@ -319,8 +324,12 @@ namespace BlogSite.Data.Migrations
                         .HasForeignKey("BlogCategoryId");
 
                     b.HasOne("BlogSite.Models.Entities.BlogPost", "BlogPost")
-                        .WithMany("PostCategories")
+                        .WithMany()
                         .HasForeignKey("BlogPostId");
+
+                    b.HasOne("BlogSite.Models.Entities.PostCategory")
+                        .WithMany("PostCategories")
+                        .HasForeignKey("PostCategoryID");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>

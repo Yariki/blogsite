@@ -35,7 +35,8 @@
     <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
     @if (User != null && SignInManager.IsSignedIn(User))
     {
-        <a asp-controller="BlogCategories" asp-action="Index">Categories</a>           
+        <a asp-controller="BlogCategories" asp-action="Index" class="user">Categories</a>
+        <a asp-controller="BlogPosts" asp-action="Index" class="user">Blogs</a>
     }
 
     @Html.Partial("_LoginPartial")   

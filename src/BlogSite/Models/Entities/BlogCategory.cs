@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlogSite.Models.Entities
 {
@@ -11,6 +12,8 @@ namespace BlogSite.Models.Entities
 
 
         public bool Enabled { get; set; }
+
+        public ICollection<PostCategory> PostCategories { get; set; }
 
     }
 }
