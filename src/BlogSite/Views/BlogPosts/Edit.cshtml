@@ -1,4 +1,4 @@
-@model BlogSite.Models.Entities.BlogPost
+@model BlogSite.Models.BlogPostViewModels.EditBlogPostViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,49 +12,45 @@
         <h4>BlogPost</h4>
         <hr />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <input type="hidden" asp-for="ID" />
+        <input type="hidden" asp-for="@Model.BlogPost.ID" />
+        <input type="hidden" asp-for=" @Model.BlogPost.ApplicationUserId"/>
         <div class="form-group">
-            <label asp-for="ApplicationUserId" class="control-label col-md-2"></label>
+            <label asp-for="@Model.BlogPost.Title" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <select asp-for="ApplicationUserId" class="form-control" asp-items="ViewBag.ApplicationUserId"></select>
-                <span asp-validation-for="ApplicationUserId" class="text-danger" />
+                <input asp-for="@Model.BlogPost.Title" class="form-control" />
+                <span asp-validation-for="@Model.BlogPost.Title" class="text-danger" />
             </div>
         </div>
         <div class="form-group">
-            <label asp-for="Article" class="col-md-2 control-label"></label>
+            <label asp-for="@Model.BlogPost.Article" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <input asp-for="Article" class="form-control" />
-                <span asp-validation-for="Article" class="text-danger" />
+                <textarea asp-for="@Model.BlogPost.Article"  rows="5" cols="250"></textarea>
+                <span asp-validation-for="@Model.BlogPost.Article" class="text-danger" />
             </div>
         </div>
         <div class="form-group">
-            <label asp-for="Created" class="col-md-2 control-label"></label>
-            <div class="col-md-10">
-                <input asp-for="Created" class="form-control" />
-                <span asp-validation-for="Created" class="text-danger" />
+            <table>
+                <tr>
+                    <td>@Html.LabelFor(m => m.BlogPost.PostCategories)</td>
+                </tr>
+                <tr>
+                    @{
+                        int cnt = 0;
+                        foreach (var modelBlogCategory in Model.PostCategoryViewModels)
+                        {
+                            if (cnt++ % 2 == 0)
+                            {
+                                @:
+                            <tr></tr>
+                            }
+                            @:
+                            <td><input type="checkbox" name="selectedCategories" checked="@modelBlogCategory.IsChecked" value="@modelBlogCategory.BlogCategory.ID" />@modelBlogCategory.BlogCategory.Name</td>
+                        }
+                    }
+                    </tr>
+                </table>
             </div>
-        </div>
-        <div class="form-group">
-            <label asp-for="Modified" class="col-md-2 control-label"></label>
-            <div class="col-md-10">
-                <input asp-for="Modified" class="form-control" />
-                <span asp-validation-for="Modified" class="text-danger" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label asp-for="Title" class="col-md-2 control-label"></label>
-            <div class="col-md-10">
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label asp-for="Views" class="col-md-2 control-label"></label>
-            <div class="col-md-10">
-                <input asp-for="Views" class="form-control" />
-                <span asp-validation-for="Views" class="text-danger" />
-            </div>
-        </div>
+
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Save" class="btn btn-default" />

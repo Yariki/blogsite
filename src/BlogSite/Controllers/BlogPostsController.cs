@@ -18,7 +18,7 @@ namespace BlogSite.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public BlogPostsController(ApplicationDbContext context,UserManager<ApplicationUser> userManager )
+        public BlogPostsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -61,8 +61,8 @@ namespace BlogSite.Controllers
             var entity = ApplicationDbContext.CreateEntity<BlogPost>();
             entity.ApplicationUserId = userId;
             var listCategories = await _context.BlogCategories.Where(c => c.Enabled).AsNoTracking().ToListAsync();
-            
-            var  createViewModel = new CreateBlogPostViewModel() {BlogPost =  entity, BlogCategories = listCategories};
+
+            var createViewModel = new CreateBlogPostViewModel() { BlogPost = entity, BlogCategories = listCategories };
 
             return View(createViewModel);
         }
@@ -104,13 +104,41 @@ namespace BlogSite.Controllers
                 return NotFound();
             }
 
-            var blogPost = await _context.BlogPosts.SingleOrDefaultAsync(m => m.ID == id);
+            var blogPost = await _context.BlogPosts.Include(b => b.PostCategories).ThenInclude(pc => pc.BlogCategory).AsNoTracking().SingleOrDefaultAsync(m => m.ID == id);
             if (blogPost == null)
             {
                 return NotFound();
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", blogPost.ApplicationUserId);
-            return View(blogPost);
+            
+
+            var editViewModel = await PrepareEditViewModel(blogPost);
+
+            if (editViewModel == null)
+            {
+                return NotFound();
+            }
+            
+            return View(editViewModel);
+        }
+
+        private async Task<EditBlogPostViewModel> PrepareEditViewModel(BlogPost blogPost)
+        {
+            var editViewModel = new EditBlogPostViewModel() { BlogPost = blogPost };
+
+            var blogCategories = await _context.BlogCategories.ToListAsync();
+
+            if (blogCategories == null || !blogCategories.Any())
+            {
+                return null;
+            }
+
+            foreach (var blogCategory in blogCategories)
+            {
+                var postCategoryViewModel = new PostCategoryViewModel() { BlogCategory = blogCategory, IsChecked = blogPost.PostCategories.Any(pc => pc.BlogCategoryId == blogCategory.ID) };
+                editViewModel.PostCategoryViewModels.Add(postCategoryViewModel);
+            }
+            
+            return editViewModel;
         }
 
         // POST: BlogPosts/Edit/5
@@ -118,35 +146,61 @@ namespace BlogSite.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("ID,ApplicationUserId,Article,Created,Modified,Title,Views")] BlogPost blogPost)
+        public async Task<IActionResult> Edit(string id, string[] selectedCategories)
         {
-            if (id != blogPost.ID)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var blogPostToUpdate = await 
+                _context.BlogPosts.Include(b => b.PostCategories)
+                    .ThenInclude(pc => pc.BlogCategory)
+                    .SingleOrDefaultAsync(b => b.ID == id);
+
+            if (await TryUpdateModelAsync<BlogPost>(blogPostToUpdate, "", b => b.Article, b => b.Title))
             {
+                UpdateBlogPostCategories(blogPostToUpdate, selectedCategories);
                 try
                 {
-                    _context.Update(blogPost);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception e)
                 {
-                    if (!BlogPostExists(blogPost.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
                 }
                 return RedirectToAction("Index");
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", blogPost.ApplicationUserId);
-            return View(blogPost);
+
+            return View(await PrepareEditViewModel(blogPostToUpdate));
+        }
+
+        private void UpdateBlogPostCategories(BlogPost blogPost, string[] selectedCategories)
+        {
+            if (selectedCategories == null || !selectedCategories.Any())
+            {
+                blogPost.PostCategories = new List<PostCategory>();
+                return;
+            }
+
+            var hashSelectedCateries = new HashSet<string>(selectedCategories);
+            var blogPostCategories = new HashSet<string>(blogPost.PostCategories.Select(c => c.BlogCategoryId));
+            
+            foreach (var contextBlogCategory in _context.BlogCategories)
+            {
+                if (hashSelectedCateries.Contains(contextBlogCategory.ID))
+                {
+                    if (!blogPostCategories.Contains(contextBlogCategory.ID))
+                    {
+                        blogPost.PostCategories.Add(new PostCategory(){ID = Guid.NewGuid().ToString(), BlogCategoryId = contextBlogCategory.ID,BlogPostId = blogPost.ID});
+                    }
+                }    
+                else if (blogPostCategories.Contains(contextBlogCategory.ID))
+                {
+                    var catToRemove = blogPost.PostCategories.SingleOrDefault(pc => pc.BlogCategoryId == contextBlogCategory.ID);
+                    _context.Remove(catToRemove);
+                }
+            }
+            
         }
 
         // GET: BlogPosts/Delete/5
@@ -171,7 +225,14 @@ namespace BlogSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var blogPost = await _context.BlogPosts.SingleOrDefaultAsync(m => m.ID == id);
+            var blogPost = await _context.BlogPosts.Include(b => b.PostCategories).SingleOrDefaultAsync(m => m.ID == id);
+            if (blogPost != null)
+            {
+                foreach (var blogPostPostCategory in blogPost.PostCategories)
+                {
+                    _context.PostCategories.Remove(blogPostPostCategory);
+                }
+            }
             _context.BlogPosts.Remove(blogPost);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
